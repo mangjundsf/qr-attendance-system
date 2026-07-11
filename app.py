@@ -67,7 +67,7 @@ def generate_qr_code():
     """출석 페이지 QR 코드 자동 생성"""
     qr_path = os.path.join(config.QR_FOLDER, 'attendance_qr.png')
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    qr.add_data('http://127.0.0.1:5000/')
+    qr.add_data('https://qr-attendance-system-nmj6.onrender.com')
     qr.make(fit=True)
     img = qr.make_image(fill_color='#0d6efd', back_color='white')
     img.save(qr_path)
