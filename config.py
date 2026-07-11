@@ -17,11 +17,6 @@ ALLOWED_LOCATIONS = [
         'latitude': 36.9897,
         'longitude': 129.4087,
     },
-    {
-        'name': '추가 위치',
-        'latitude': 36.893,
-        'longitude': 129.377,
-    },
 ]
 ALLOWED_RADIUS_METERS = 100000000000
 
