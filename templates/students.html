@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}학생 관리 - 출석 관리{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h2><i class="bi bi-people"></i> 학생 관리</h2>
+        <p class="text-muted mb-0">총 {{ students|length }}명</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+        <i class="bi bi-plus-lg"></i> 학생 추가
+    </button>
+</div>
+
+<!-- 검색 필터 -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">검색</label>
+                <input type="text" class="form-control" name="search" value="{{ search }}"
+                       placeholder="학번 또는 이름">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">학년</label>
+                <select class="form-select" name="grade">
+                    <option value="">전체</option>
+                    {% for g in range(1, 4) %}
+                    <option value="{{ g }}" {% if grade == g|string %}selected{% endif %}>{{ g }}학년</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">반</label>
+                <select class="form-select" name="class_number">
+                    <option value="">전체</option>
+                    {% for c in range(1, 11) %}
+                    <option value="{{ c }}" {% if class_number == c|string %}selected{% endif %}>{{ c }}반</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> 검색
+                </button>
+                <a href="{{ url_for('students') }}" class="btn btn-outline-secondary">초기화</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 학생 목록 -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>학번</th>
+                        <th>이름</th>
+                        <th>학년</th>
+                        <th>반</th>
+                        <th>번호</th>
+                        <th>출석률</th>
+                        <th>지각률</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr>
+                        <td>{{ s.student_id }}</td>
+                        <td>{{ s.name }}</td>
+                        <td>{{ s.grade }}</td>
+                        <td>{{ s.class_number }}</td>
+                        <td>{{ s.student_number }}</td>
+                        <td><span class="text-success">{{ s.rates.present_rate }}%</span></td>
+                        <td><span class="text-warning">{{ s.rates.late_rate }}%</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary edit-btn"
+                                    data-id="{{ s.id }}"
+                                    data-student-id="{{ s.student_id }}"
+                                    data-name="{{ s.name }}"
+                                    data-grade="{{ s.grade }}"
+                                    data-class="{{ s.class_number }}"
+                                    data-number="{{ s.student_number }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-btn"
+                                    data-id="{{ s.id }}" data-name="{{ s.name }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            등록된 학생이 없습니다. 학생을 추가하거나 Excel로 업로드하세요.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 학생 추가 모달 -->
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus"></i> 학생 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addStudentForm">
+                    <div class="mb-3">
+                        <label class="form-label">학번</label>
+                        <input type="text" class="form-control" name="student_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">이름</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <label class="form-label">학년</label>
+                            <input type="number" class="form-control" name="grade" min="1" max="3" required>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label">반</label>
+                            <input type="number" class="form-control" name="class_number" min="1" required>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label">번호</label>
+                            <input type="number" class="form-control" name="student_number" min="1" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="saveStudentBtn">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 학생 수정 모달 -->
+<div class="modal fade" id="editStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil"></i> 학생 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editStudentForm">
+                    <input type="hidden" name="id" id="editId">
+                    <div class="mb-3">
+                        <label class="form-label">학번</label>
+                        <input type="text" class="form-control" name="student_id" id="editStudentId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">이름</label>
+                        <input type="text" class="form-control" name="name" id="editName" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <label class="form-label">학년</label>
+                            <input type="number" class="form-control" name="grade" id="editGrade" min="1" max="3" required>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label">반</label>
+                            <input type="number" class="form-control" name="class_number" id="editClass" min="1" required>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label">번호</label>
+                            <input type="number" class="form-control" name="student_number" id="editNumber" min="1" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="updateStudentBtn">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/students.js') }}"></script>
+{% endblock %}

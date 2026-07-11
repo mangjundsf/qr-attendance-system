@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}대시보드 - 출석 관리{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-speedometer2"></i> 대시보드</h2>
+    <p class="text-muted">{{ today }}</p>
+</div>
+
+<!-- 통계 카드 -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-subtle text-primary">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">전체 학생</span>
+                <span class="stat-value">{{ stats.total }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-subtle text-success">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">출석</span>
+                <span class="stat-value">{{ stats.present }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-subtle text-warning">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">지각</span>
+                <span class="stat-value">{{ stats.late }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger-subtle text-danger">
+                <i class="bi bi-x-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">결석</span>
+                <span class="stat-value">{{ stats.absent }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-info-subtle text-info">
+                <i class="bi bi-percent"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">출석률</span>
+                <span class="stat-value">{{ stats.rate }}%</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-secondary-subtle text-secondary">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">오늘 출석</span>
+                <span class="stat-value">{{ stats.attended_today }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- QR 코드 -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-qr-code"></i> 출석 QR 코드</h5>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='qr/attendance_qr.png') }}"
+                     alt="출석 QR 코드" class="qr-image mb-3">
+                <p class="text-muted small">학생들이 이 QR을 스캔하여 출석합니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 출석 통계 -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> 출석 통계</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">전체 기록 통계</h6>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="mini-stat">
+                                <span class="text-success fw-bold">{{ attendance_stats.present_count }}</span>
+                                <small class="text-muted d-block">출석 ({{ attendance_stats.present_rate }}%)</small>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="text-warning fw-bold">{{ attendance_stats.late_count }}</span>
+                                <small class="text-muted d-block">지각 ({{ attendance_stats.late_rate }}%)</small>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="text-primary fw-bold">{{ attendance_stats.total_records }}</span>
+                                <small class="text-muted d-block">총 기록</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">세션별 출석</h6>
+                        {% for item in attendance_stats.by_session %}
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>{{ item.session }}</span>
+                            <span class="fw-bold">{{ item.count }}명</span>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">출석 기록이 없습니다.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 최근 출석 -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> 최근 출석 기록</h5>
+        <a href="{{ url_for('attendance_list') }}" class="btn btn-sm btn-outline-primary">전체 보기</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>학번</th>
+                        <th>이름</th>
+                        <th>시간</th>
+                        <th>세션</th>
+                        <th>상태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in recent %}
+                    <tr>
+                        <td>{{ r.student_id }}</td>
+                        <td>{{ r.student_name }}</td>
+                        <td>{{ r.time.strftime('%H:%M:%S') }}</td>
+                        <td>{{ r.session or '-' }}</td>
+                        <td>
+                            {% if r.status == '출석' %}
+                                <span class="badge bg-success">{{ r.status }}</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">{{ r.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">출석 기록이 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

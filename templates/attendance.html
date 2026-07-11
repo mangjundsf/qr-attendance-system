@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}출석 관리 - 출석 관리{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h2><i class="bi bi-calendar-check"></i> 출석 관리</h2>
+        <p class="text-muted mb-0">총 {{ records|length }}건</p>
+    </div>
+    <a href="{{ url_for('export_attendance', search=search, date=date_filter) }}"
+       class="btn btn-success">
+        <i class="bi bi-download"></i> Excel 다운로드
+    </a>
+</div>
+
+<!-- 검색 필터 -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">검색</label>
+                <input type="text" class="form-control" name="search" value="{{ search }}"
+                       placeholder="학번 또는 이름">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">날짜</label>
+                <input type="date" class="form-control" name="date" value="{{ date_filter }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">학년</label>
+                <select class="form-select" name="grade">
+                    <option value="">전체</option>
+                    {% for g in range(1, 4) %}
+                    <option value="{{ g }}" {% if grade == g|string %}selected{% endif %}>{{ g }}학년</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">반</label>
+                <select class="form-select" name="class_number">
+                    <option value="">전체</option>
+                    {% for c in range(1, 11) %}
+                    <option value="{{ c }}" {% if class_number == c|string %}selected{% endif %}>{{ c }}반</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> 검색
+                </button>
+                <a href="{{ url_for('attendance_list') }}" class="btn btn-outline-secondary">초기화</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 출석 목록 -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>학번</th>
+                        <th>이름</th>
+                        <th>날짜</th>
+                        <th>출석시간</th>
+                        <th>세션</th>
+                        <th>상태</th>
+                        <th>위도</th>
+                        <th>경도</th>
+                        <th>거리(m)</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td>{{ r.student_id }}</td>
+                        <td>{{ r.student_name }}</td>
+                        <td>{{ r.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ r.time.strftime('%H:%M:%S') }}</td>
+                        <td>{{ r.session or '-' }}</td>
+                        <td>
+                            {% if r.status == '출석' %}
+                                <span class="badge bg-success">{{ r.status }}</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">{{ r.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ '%.6f'|format(r.latitude) if r.latitude else '-' }}</td>
+                        <td>{{ '%.6f'|format(r.longitude) if r.longitude else '-' }}</td>
+                        <td>{{ '%.1f'|format(r.distance) if r.distance else '-' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary edit-att-btn"
+                                    data-id="{{ r.id }}"
+                                    data-status="{{ r.status }}"
+                                    data-session="{{ r.session or '' }}"
+                                    data-time="{{ r.time.strftime('%H:%M') }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-att-btn"
+                                    data-id="{{ r.id }}" data-name="{{ r.student_name }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">출석 기록이 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 출석 수정 모달 -->
+<div class="modal fade" id="editAttendanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil"></i> 출석 기록 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editAttendanceForm">
+                    <input type="hidden" id="editAttId">
+                    <div class="mb-3">
+                        <label class="form-label">상태</label>
+                        <select class="form-select" id="editAttStatus">
+                            <option value="출석">출석</option>
+                            <option value="지각">지각</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">세션</label>
+                        <select class="form-select" id="editAttSession">
+                            <option value="야자1">야자1</option>
+                            <option value="야자2">야자2</option>
+                            <option value="심야야자">심야야자</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">출석 시간</label>
+                        <input type="time" class="form-control" id="editAttTime">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="updateAttBtn">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/attendance_admin.js') }}"></script>
+{% endblock %}
