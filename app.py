@@ -194,7 +194,7 @@ def dashboard():
     """관리자 메인 대시보드"""
     stats = get_today_stats()
     attendance_stats = get_attendance_statistics()
-    today = datetime.now().strftime('%Y년 %m월 %d일')
+    today = datetime.now(ZoneInfo("Asia/Seoul")).strftime('%Y년 %m월 %d일')
 
     recent = Attendance.query.order_by(Attendance.created_at.desc()).limit(10).all()
 
@@ -444,7 +444,7 @@ def upload():
 @login_required
 def export_today():
     """오늘 출석 기록 Excel 다운로드"""
-    today = datetime.now().date()
+    today = datetime.now(ZoneInfo("Asia/Seoul")).date()
     records = Attendance.query.filter_by(date=today).order_by(Attendance.time).all()
 
     data = []
