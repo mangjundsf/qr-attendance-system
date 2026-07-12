@@ -106,7 +106,7 @@ def check_attendance():
     if not student:
         return jsonify({'success': False, 'message': '등록되지 않은 학생입니다. 학번과 이름을 확인해주세요.'}), 404
 
-    today = datetime.now(ZoneInfo("Asia/Seoul")).date()
+    today = datetime.now().date()
     existing = Attendance.query.filter_by(student_id=student_id, date=today).first()
     if existing:
         return jsonify({'success': False, 'message': '이미 오늘 출석하였습니다.'}), 409
@@ -122,7 +122,7 @@ def check_attendance():
     if error:
         return jsonify({'success': False, 'message': error}), 400
 
-    now = datetime.now(ZoneInfo("Asia/Seoul"))
+    now = datetime.now()
     attendance = Attendance(
         student_id=student.student_id,
         student_name=student.name,
@@ -194,7 +194,7 @@ def dashboard():
     """관리자 메인 대시보드"""
     stats = get_today_stats()
     attendance_stats = get_attendance_statistics()
-    today = datetime.now(ZoneInfo("Asia/Seoul")).strftime('%Y년 %m월 %d일')
+    today = datetime.now().strftime('%Y년 %m월 %d일')
 
     recent = Attendance.query.order_by(Attendance.created_at.desc()).limit(10).all()
 
