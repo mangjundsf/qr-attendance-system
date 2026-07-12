@@ -28,11 +28,13 @@ SCHOOL_LONGITUDE = ALLOWED_LOCATIONS[0]['longitude']
 ATTENDANCE_SLOTS = [
      {
         'name': '확인용',
-        'start_hour': 0,     
-        'start_minute': 0,
-        'end_hour': 23,      
-        'end_minute': 0,      
-    }
+        'start_hour': 00,
+        'start_minute': 00,
+        'end_hour': 23,
+        'end_minute': 00,
+        'late_until_hour': 23,
+        'late_until_minute': 50,
+    },
 ]
 
 
