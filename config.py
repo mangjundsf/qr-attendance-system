@@ -29,8 +29,8 @@ ATTENDANCE_SLOTS = [
      {
         'name': '확인용',
         'start_hour': 0,     
-        'start_minute': 10,
-        'end_hour': 22,      
+        'start_minute': 0,
+        'end_hour': 23,      
         'end_minute': 0,      
     }
 ]
