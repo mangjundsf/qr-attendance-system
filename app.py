@@ -1,7 +1,6 @@
 """QR + GPS 기반 스마트 출석 관리 시스템"""
 import os
 from datetime import datetime
-from zoneinfo import Zoneinfo
 from functools import wraps
 from io import BytesIO
 
