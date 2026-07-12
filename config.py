@@ -28,11 +28,11 @@ SCHOOL_LONGITUDE = ALLOWED_LOCATIONS[0]['longitude']
 ATTENDANCE_SLOTS = [
      {
         'name': '확인용',
-        'start_hour': 0,        # 00 대신 0으로 수정 (문법 에러 방지)
+        'start_hour': 0,     
         'start_minute': 10,
-        'end_hour': 22,         # 23 대신 22로 수정 (지각 버퍼가 더해져도 23시가 되도록 안전하게 설정)
-        'end_minute': 0,        # 00 대신 0으로 수정 (문법 에러 방지)
-    },
+        'end_hour': 22,      
+        'end_minute': 0,      
+    }
 ]
 
 
