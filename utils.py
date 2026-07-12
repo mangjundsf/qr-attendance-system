@@ -1,5 +1,6 @@
 """출석 관련 유틸리티 함수"""
 from datetime import datetime, time
+from zoneinfo import Zoneinfo
 
 from geopy.distance import geodesic
 
@@ -35,7 +36,7 @@ def get_current_slot(now=None):
     Returns: (session_name, status, error_message)
     """
     if now is None:
-        now = datetime.now()
+        now = datetime.now(ZoneInfo("Asia/Seoul"))
 
     current_time = now.time()
     first_slot = config.ATTENDANCE_SLOTS[0]
@@ -67,7 +68,7 @@ def get_today_stats():
     """오늘 출석 통계 계산"""
     from models import Attendance, Student, db
 
-    today = datetime.now().date()
+    today = datetime.now(ZoneInfo("Asia/Seoul")).date()
     total_students = Student.query.count()
     today_records = Attendance.query.filter_by(date=today).all()
 
